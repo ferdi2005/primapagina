@@ -88,4 +88,4 @@ list.insert(0, "<noinclude>
     ************************************************************************-->
     </noinclude>\n")
 puts "Finalizzo e pubblico"
-client.edit(title: "Utente:Ferdi2005/Sandbox", text: list.join(""))
+client.edit(title: "Template:Pagina principale/Primo piano/Prima Pagina", text: list.join(""))
