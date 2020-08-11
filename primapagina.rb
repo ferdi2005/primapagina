@@ -1,17 +1,17 @@
 require 'mediawiki_api'
-if !File.exist? '.wikiuser'
+if !File.exist? "#{__dir__}/.wikiuser"
     puts 'Inserisci username:'
     print '> '
     username = gets.chomp
     puts 'Inserisci password:'
     print '> '
     password = gets.chomp
-    File.open(".wikiuser", "w") do |file| 
+    File.open("#{__dir__}/.wikiuser", "w") do |file| 
       file.puts username
       file.puts password
     end
   end  
-userdata = File.open(".wikiuser", "r").to_a
+userdata = File.open("#{__dir__}/.wikiuser", "r").to_a
 
 client = MediawikiApi::Client.new 'https://it.wikinews.org/w/api.php'
 client.log_in "#{userdata[0].gsub("\n", "")}", "#{userdata[1].gsub("\n", "")}"
