@@ -39,7 +39,7 @@ pubblicati.map do |pubblicato|
   end  
 end
 
-pubblicati = pubblicati.sort_by {|p| p["rubydate"]}.reverse.last(6)
+pubblicati = pubblicati.sort_by {|p| p["rubydate"]}.reverse.first(6)
 
 # Lista del contenuto
 list = []
