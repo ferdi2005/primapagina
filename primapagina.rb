@@ -1,4 +1,5 @@
 require 'mediawiki_api'
+require 'date'
 if !File.exist? "#{__dir__}/.wikiuser"
     puts 'Inserisci username:'
     print '> '
@@ -16,10 +17,29 @@ userdata = File.open("#{__dir__}/.wikiuser", "r").to_a
 client = MediawikiApi::Client.new 'https://it.wikinews.org/w/api.php'
 client.log_in "#{userdata[0].gsub("\n", "")}", "#{userdata[1].gsub("\n", "")}"
 
-pubblicati = client.query(list: :categorymembers, cmtitle: "Categoria:Notizie da prima pagina", cmsort: :timestamp, cmdir: :desc, cmlimit: 6)["query"]["categorymembers"]
+pubblicati = client.query(list: :categorymembers, cmtitle: "Categoria:Notizie da prima pagina", cmsort: :timestamp, cmdir: :desc, cmlimit: 50)["query"]["categorymembers"]
 
 # Rigetto cose non nel ns0 (eventuali errori)
 pubblicati.reject! { |pubblicato| pubblicato["ns"] != 0 }
+
+pubblicati.map do |pubblicato|
+  content = client.query(prop: :revisions, rvprop: :content, titles: pubblicato["title"], rvlimit: 1)["query"]["pages"]["#{pubblicato["pageid"]}"]["revisions"][0]["*"]
+  match = content.match(/{{data\|(.+)\|(lunedì|martedì|mercoledì|giovedì|venerdì|sabato|domenica)}}/i)
+  data = match[1]
+  giorno = match[2]
+  pubblicato["content"] = content
+  pubblicato["match"] = match
+  pubblicato["data"] = match[1]
+  pubblicato["giorno"] = match[2]
+  months = [["gennaio", "Jan"], ["febbraio", "Feb"], ["marzo", "Mar"], ["aprile", "Apr"], ["maggio", "May"], ["giugno", "Jun"], ["luglio", "Jul"], ["agosto", "Aug"], ["settembre", "Sep"], ["ottobre", "Oct"], ["novembre", "Nov"], ["dicembre", "Dec"]]
+  months.each do |italian_month, english_month|
+    if pubblicato["data"].match? italian_month      
+      pubblicato["rubydate"] = DateTime.parse(pubblicato["data"].gsub(/#{italian_month}/, english_month))
+    end
+  end  
+end
+
+pubblicati = pubblicati.sort_by {|p| p["rubydate"]}.reverse.last(6)
 
 # Lista del contenuto
 list = []
@@ -30,10 +50,9 @@ pubblicati.each do |pubblicato|
 
     puts "Svolgo le operazioni per #{pubblicato["title"]} - #{svolgimento}º articolo"
 
-    content = client.query(prop: :revisions, rvprop: :content, titles: pubblicato["title"], rvlimit: 1)["query"]["pages"]["#{pubblicato["pageid"]}"]["revisions"][0]["*"]
-    match = content.match(/{{data\|(.+)\|(lunedì|martedì|mercoledì|giovedì|venerdì|sabato|domenica)}}/i)
-    data = match[1]
-    giorno = match[2]
+    content = pubblicato["content"]    
+    data = pubblicato["data"]
+    giorno = pubblicato["giorno"]
 
     estratto = client.query(prop: :extracts, exsentences: 2, exintro: 1, explaintext: 1, titles: pubblicato["title"])["query"]["pages"]["#{pubblicato["pageid"]}"]["extract"]
     estratto.gsub!("#{giorno} #{data}", "")
