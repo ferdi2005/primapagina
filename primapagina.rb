@@ -16,7 +16,7 @@ userdata = File.open("#{__dir__}/.wikiuser", "r").to_a
 client = MediawikiApi::Client.new 'https://it.wikinews.org/w/api.php'
 client.log_in "#{userdata[0].gsub("\n", "")}", "#{userdata[1].gsub("\n", "")}"
 
-pubblicati = client.query(list: :categorymembers, cmtitle: "Categoria:Pubblicati", cmsort: :timestamp, cmdir: :desc, cmlimit: 6)["query"]["categorymembers"]
+pubblicati = client.query(list: :categorymembers, cmtitle: "Categoria:Notizie da prima pagina", cmsort: :timestamp, cmdir: :desc, cmlimit: 6)["query"]["categorymembers"]
 
 # Rigetto cose non nel ns0 (eventuali errori)
 pubblicati.reject! { |pubblicato| pubblicato["ns"] != 0 }
