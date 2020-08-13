@@ -51,38 +51,9 @@ end
 list.insert(0, "<noinclude>
     [[Categoria:Template della pagina principale]]<!--
 
-    Questa pagina viene aggiornata automaticamente da un bot. Se riscontri dei problemi puoi contattare Utente:Ferdi2005. Se tuttavia non riscontri problemi diretti col bot ma desideri modificare la pagina, segui le istruzioni riportate qui sottof.check_box :attribute
-    SE VUOI CAMBIARLO MODIFICA IL TEMPLATE:PRIMOPIANO IN QUESTO MODO:
+    Questa pagina viene aggiornata automaticamente da un bot.
     
-    {{Primopiano
-    |data= data della pubblicazione della notizia. Esempio: 10 febbraio 2013
-    |link-titolo= link esatto all'articolo (senza [[]]), vale anche come titolo
-    |titolo-sostitutivo= da compilare solo se si vuole un titolo diverso da quello in link-titolo
-    |immagine= nome dell'immagine (senza [[File:]]; esempio: Breaking it.png)
-    |grandezza= dimensione in pixel (esempio: 100px)
-    |direzione= può essere left o right a seconda che si voglia mettere l'immagine a sinistra o a destra
-    |didascalia= breve descrizione dell'immagine. Se non presente scrivi none
-    |introduzione= breve introduzione all'articolo. Non è obbligatoria
-    |testo= breve testo che descrive l'articolo. Puoi prendere la parte introduttiva dell'articolo stesso oppure puoi scriverlo tu. *NON* inserire wikilink in questa descrizione!}}
-    
-    versione a campi vuoti per comodità di copia-e-incolla
-    ------------------------------------------------------
-    
-    {{Primopiano
-    |data=
-    |link-titolo= 
-    |titolo-sostitutivo=
-    |immagine=
-    |grandezza= 100px
-    |direzione= left
-    |didascalia= none
-    |introduzione=
-    |testo=
-    }}
-    
-    PER FAVORE COMMENTATE L'IMMAGINE QUANDO NON SERVE MA *NON* CANCELLATELA!!
-    QUANDO AGGIORNATE QUESTO TEMPLATE ELIMINATE GLI ARTICOLI DAL PIÙ VECCHIO AL PIÙ RECENTE
-    INSERITE MASSIMO SEI ARTICOLI
+    Per far apparire gli articoli nella prima pagina, inserisci in essi la categoria [[Categoria:Notizie da prima pagina]]
     
     LE NOTIZIE COMINCIANO SOTTO GLI ASTERISCHI
     ************************************************************************-->
