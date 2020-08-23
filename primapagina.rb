@@ -24,9 +24,21 @@ pubblicati.reject! { |pubblicato| pubblicato["ns"] != 0 }
 
 pubblicati.map do |pubblicato|
   content = client.query(prop: :revisions, rvprop: :content, titles: pubblicato["title"], rvlimit: 1)["query"]["pages"]["#{pubblicato["pageid"]}"]["revisions"][0]["*"]
-  match = content.match(/{{data\|(.+)\|(lunedì|martedì|mercoledì|giovedì|venerdì|sabato|domenica)}}/i)
-  data = match[1]
-  giorno = match[2]
+  if content.match?(/{{data\|\d{1,2} \w+ \d{4}\|(lunedì|martedì|mercoledì|giovedì|venerdì|sabato|domenica)}}/i)
+    match = content.match(/{{data\|\d{1,2} \w+ \d{4}\|(lunedì|martedì|mercoledì|giovedì|venerdì|sabato|domenica)}}/i)
+    data = match[1]
+    giorno = match[2]  
+  elsif content.match?(/{{luogodata\|luogo=[a-zA-ZÀ-ÖØ-öø-ÿ]+\|1=(lunedì|martedì|mercoledì|giovedì|venerdì|sabato|domenica)\|data=(\d{1,2} \w+ \d{4})}}/i)
+    match = content.match(/{{luogodata\|luogo=[a-zA-ZÀ-ÖØ-öø-ÿ]+\|1=(lunedì|martedì|mercoledì|giovedì|venerdì|sabato|domenica)\|data=(\d{1,2} \w+ \d{4})}}/i)
+    giorno = match[1]
+    data = match[2]
+  elsif content.match?(/{{data\|1=(\d{1,2} \w+ \d{4})\|2=(lunedì|martedì|mercoledì|giovedì|venerdì|sabato|domenica)}}/i)
+    match = content.match(/{{data\|1=(\d{1,2} \w+ \d{4})\|2=(lunedì|martedì|mercoledì|giovedì|venerdì|sabato|domenica)}}/i)
+    data = match[1]
+    giorno = match[2]
+  else
+    next
+  end
   pubblicato["content"] = content
   pubblicato["match"] = match
   pubblicato["data"] = match[1]
