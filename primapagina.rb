@@ -24,25 +24,29 @@ pubblicati.reject! { |pubblicato| pubblicato["ns"] != 0 }
 
 pubblicati.map do |pubblicato|
   content = client.query(prop: :revisions, rvprop: :content, titles: pubblicato["title"], rvlimit: 1)["query"]["pages"]["#{pubblicato["pageid"]}"]["revisions"][0]["*"]
-  if content.match?(/{{data\|\d{1,2} \w+ \d{4}\|(lunedì|martedì|mercoledì|giovedì|venerdì|sabato|domenica)}}/i)
-    match = content.match(/{{data\|\d{1,2} \w+ \d{4}\|(lunedì|martedì|mercoledì|giovedì|venerdì|sabato|domenica)}}/i)
+  if content.match?(/{{data\|(\d{1,2} \w+ \d{4})\|(lunedì|martedì|mercoledì|giovedì|venerdì|sabato|domenica)}}/i)
+    match = content.match(/{{data\|(\d{1,2} \w+ \d{4})\|(lunedì|martedì|mercoledì|giovedì|venerdì|sabato|domenica)}}/i)
     data = match[1]
     giorno = match[2]  
-  elsif content.match?(/{{luogodata\|luogo=[a-zA-ZÀ-ÖØ-öø-ÿ]+\|1=(lunedì|martedì|mercoledì|giovedì|venerdì|sabato|domenica)\|data=(\d{1,2} \w+ \d{4})}}/i)
-    match = content.match(/{{luogodata\|luogo=[a-zA-ZÀ-ÖØ-öø-ÿ]+\|1=(lunedì|martedì|mercoledì|giovedì|venerdì|sabato|domenica)\|data=(\d{1,2} \w+ \d{4})}}/i)
-    giorno = match[1]
-    data = match[2]
+    pubblicato["with_luogo"] = false
+  elsif content.match?(/{{luogodata\|luogo=([a-zA-ZÀ-ÖØ-öø-ÿ]+)\|1=(lunedì|martedì|mercoledì|giovedì|venerdì|sabato|domenica)\|data=(\d{1,2} \w+ \d{4})}}/i)
+    match = content.match(/{{luogodata\|luogo=([a-zA-ZÀ-ÖØ-öø-ÿ]+)\|1=(lunedì|martedì|mercoledì|giovedì|venerdì|sabato|domenica)\|data=(\d{1,2} \w+ \d{4})}}/i)
+    pubblicato["luogo"] = match[1]
+    giorno = match[2]
+    data = match[3]
+    pubblicato["with_luogo"] = true
   elsif content.match?(/{{data\|1=(\d{1,2} \w+ \d{4})\|2=(lunedì|martedì|mercoledì|giovedì|venerdì|sabato|domenica)}}/i)
     match = content.match(/{{data\|1=(\d{1,2} \w+ \d{4})\|2=(lunedì|martedì|mercoledì|giovedì|venerdì|sabato|domenica)}}/i)
     data = match[1]
     giorno = match[2]
+    pubblicato["with_luogo"] = false
   else
     next
   end
   pubblicato["content"] = content
   pubblicato["match"] = match
-  pubblicato["data"] = match[1]
-  pubblicato["giorno"] = match[2]
+  pubblicato["data"] = data
+  pubblicato["giorno"] = giorno
   months = [["gennaio", "Jan"], ["febbraio", "Feb"], ["marzo", "Mar"], ["aprile", "Apr"], ["maggio", "May"], ["giugno", "Jun"], ["luglio", "Jul"], ["agosto", "Aug"], ["settembre", "Sep"], ["ottobre", "Oct"], ["novembre", "Nov"], ["dicembre", "Dec"]]
   months.each do |italian_month, english_month|
     if pubblicato["data"].match? italian_month      
@@ -67,7 +71,11 @@ pubblicati.each do |pubblicato|
     giorno = pubblicato["giorno"]
 
     estratto = client.query(prop: :extracts, exsentences: 2, exintro: 1, explaintext: 1, titles: pubblicato["title"])["query"]["pages"]["#{pubblicato["pageid"]}"]["extract"]
-    estratto.gsub!("#{giorno} #{data}", "")
+    if pubblicato["with_luogo"]
+      estratto.gsub!("#{pubblicato["luogo"]}, #{giorno} #{data}", "").strip!
+    else
+      estratto.gsub!("#{giorno} #{data}", "").strip!
+    end
     estratto.gsub!("\n", "")
 
     direzione = "right" if svolgimento.odd?
