@@ -1,17 +1,18 @@
 require 'mediawiki_api'
 require 'date'
+
 if !File.exist? "#{__dir__}/.wikiuser"
-    puts 'Inserisci username:'
-    print '> '
-    username = gets.chomp
-    puts 'Inserisci password:'
-    print '> '
-    password = gets.chomp
-    File.open("#{__dir__}/.wikiuser", "w") do |file| 
-      file.puts username
-      file.puts password
-    end
-  end  
+  puts 'Inserisci username:'
+  print '> '
+  username = gets.chomp
+  puts 'Inserisci password:'
+  print '> '
+  password = gets.chomp
+  File.open("#{__dir__}/.wikiuser", "w") do |file| 
+    file.puts username
+    file.puts password
+  end
+end  
 userdata = File.open("#{__dir__}/.wikiuser", "r").to_a
 
 client = MediawikiApi::Client.new 'https://it.wikinews.org/w/api.php'
@@ -35,12 +36,19 @@ pubblicati.map do |pubblicato|
     giorno = match[2]
     data = match[3]
     pubblicato["with_luogo"] = true
+  elsif content.match?(/{{luogodata\|(lunedì|martedì|mercoledì|giovedì|venerdì|sabato|domenica)\|luogo=([a-zA-ZÀ-ÖØ-öø-ÿ]+)\|data=(\d{1,2} \w+ \d{4})}}/i)
+    match = content.match(/{{luogodata\|(lunedì|martedì|mercoledì|giovedì|venerdì|sabato|domenica)\|luogo=([a-zA-ZÀ-ÖØ-öø-ÿ]+)\|data=(\d{1,2} \w+ \d{4})}}/i)
+    pubblicato["luogo"] = match[1]
+    giorno = match[2]
+    data = match[3]
+    pubblicato["with_luogo"] = true
   elsif content.match?(/{{data\|1=(\d{1,2} \w+ \d{4})\|2=(lunedì|martedì|mercoledì|giovedì|venerdì|sabato|domenica)}}/i)
     match = content.match(/{{data\|1=(\d{1,2} \w+ \d{4})\|2=(lunedì|martedì|mercoledì|giovedì|venerdì|sabato|domenica)}}/i)
     data = match[1]
     giorno = match[2]
     pubblicato["with_luogo"] = false
   else
+    pubblicato["funzionante"] = false
     next
   end
   pubblicato["content"] = content
@@ -54,6 +62,8 @@ pubblicati.map do |pubblicato|
     end
   end  
 end
+
+pubblicati = pubblicati.delete_if { |p| p["funzionante"] == false }
 
 pubblicati = pubblicati.sort_by {|p| p["rubydate"]}.reverse.first(6)
 
