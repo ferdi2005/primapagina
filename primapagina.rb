@@ -38,8 +38,8 @@ pubblicati.map do |pubblicato|
     pubblicato["with_luogo"] = true
   elsif content.match?(/{{luogodata\|(lunedì|martedì|mercoledì|giovedì|venerdì|sabato|domenica)\|luogo=([a-zA-ZÀ-ÖØ-öø-ÿ]+)\|data=(\d{1,2} \w+ \d{4})}}/i)
     match = content.match(/{{luogodata\|(lunedì|martedì|mercoledì|giovedì|venerdì|sabato|domenica)\|luogo=([a-zA-ZÀ-ÖØ-öø-ÿ]+)\|data=(\d{1,2} \w+ \d{4})}}/i)
-    pubblicato["luogo"] = match[1]
-    giorno = match[2]
+    pubblicato["luogo"] = match[2]
+    giorno = match[1]
     data = match[3]
     pubblicato["with_luogo"] = true
   elsif content.match?(/{{data\|1=(\d{1,2} \w+ \d{4})\|2=(lunedì|martedì|mercoledì|giovedì|venerdì|sabato|domenica)}}/i)
