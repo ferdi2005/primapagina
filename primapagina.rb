@@ -58,7 +58,7 @@ pubblicati.map do |pubblicato|
   months = [["gennaio", "Jan"], ["febbraio", "Feb"], ["marzo", "Mar"], ["aprile", "Apr"], ["maggio", "May"], ["giugno", "Jun"], ["luglio", "Jul"], ["agosto", "Aug"], ["settembre", "Sep"], ["ottobre", "Oct"], ["novembre", "Nov"], ["dicembre", "Dec"]]
   months.each do |italian_month, english_month|
     if pubblicato["data"].match? italian_month      
-      pubblicato["rubydate"] = DateTime.parse(pubblicato["data"].gsub(/#{italian_month}/, english_month))
+      pubblicato["rubydate"] = DateTime.parse(pubblicato["data"].downcase.gsub(/#{italian_month}/, english_month))
     end
   end  
 end
