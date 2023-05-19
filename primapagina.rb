@@ -1,4 +1,5 @@
 require 'mediawiki_api'
+require 'wikinotizie'
 require 'date'
 
 if !File.exist? "#{__dir__}/.wikiuser"
@@ -25,42 +26,13 @@ pubblicati.reject! { |pubblicato| pubblicato["ns"] != 0 }
 
 pubblicati.map do |pubblicato|
   content = client.query(prop: :revisions, rvprop: :content, titles: pubblicato["title"], rvlimit: 1)["query"]["pages"]["#{pubblicato["pageid"]}"]["revisions"][0]["*"]
-  if content.match?(/{{data\|(\d{1,2} \w+ \d{4})\|(lunedì|martedì|mercoledì|giovedì|venerdì|sabato|domenica)}}/i)
-    match = content.match(/{{data\|(\d{1,2} \w+ \d{4})\|(lunedì|martedì|mercoledì|giovedì|venerdì|sabato|domenica)}}/i)
-    data = match[1]
-    giorno = match[2]  
-    pubblicato["with_luogo"] = false
-  elsif content.match?(/{{luogodata\|luogo=([a-zA-ZÀ-ÖØ-öø-ÿ]+)\|1=(lunedì|martedì|mercoledì|giovedì|venerdì|sabato|domenica)\|data=(\d{1,2} \w+ \d{4})}}/i)
-    match = content.match(/{{luogodata\|luogo=([a-zA-ZÀ-ÖØ-öø-ÿ]+)\|1=(lunedì|martedì|mercoledì|giovedì|venerdì|sabato|domenica)\|data=(\d{1,2} \w+ \d{4})}}/i)
-    pubblicato["luogo"] = match[1]
-    giorno = match[2]
-    data = match[3]
-    pubblicato["with_luogo"] = true
-  elsif content.match?(/{{luogodata\|(lunedì|martedì|mercoledì|giovedì|venerdì|sabato|domenica)\|luogo=([a-zA-ZÀ-ÖØ-öø-ÿ]+)\|data=(\d{1,2} \w+ \d{4})}}/i)
-    match = content.match(/{{luogodata\|(lunedì|martedì|mercoledì|giovedì|venerdì|sabato|domenica)\|luogo=([a-zA-ZÀ-ÖØ-öø-ÿ]+)\|data=(\d{1,2} \w+ \d{4})}}/i)
-    pubblicato["luogo"] = match[2]
-    giorno = match[1]
-    data = match[3]
-    pubblicato["with_luogo"] = true
-  elsif content.match?(/{{data\|1=(\d{1,2} \w+ \d{4})\|2=(lunedì|martedì|mercoledì|giovedì|venerdì|sabato|domenica)}}/i)
-    match = content.match(/{{data\|1=(\d{1,2} \w+ \d{4})\|2=(lunedì|martedì|mercoledì|giovedì|venerdì|sabato|domenica)}}/i)
-    data = match[1]
-    giorno = match[2]
-    pubblicato["with_luogo"] = false
-  else
-    pubblicato["funzionante"] = false
-    next
-  end
-  pubblicato["content"] = content
-  pubblicato["match"] = match
-  pubblicato["data"] = data
-  pubblicato["giorno"] = giorno
-  months = [["gennaio", "Jan"], ["febbraio", "Feb"], ["marzo", "Mar"], ["aprile", "Apr"], ["maggio", "May"], ["giugno", "Jun"], ["luglio", "Jul"], ["agosto", "Aug"], ["settembre", "Sep"], ["ottobre", "Oct"], ["novembre", "Nov"], ["dicembre", "Dec"]]
-  months.each do |italian_month, english_month|
-    if pubblicato["data"].match? italian_month      
-      pubblicato["rubydate"] = DateTime.parse(pubblicato["data"].downcase.gsub(/#{italian_month}/, english_month))
-    end
-  end  
+  
+  parsed = Wikinotizie.parse(content)
+  pubblicato["content"] = parsed[0]
+  pubblicato["match"] = parsed[1]
+  pubblicato["data"] = parsed[2]
+  pubblicato["giorno"] = parsed[3]
+  pubblicato["rubydate"] = parsed[4]
 end
 
 pubblicati = pubblicati.delete_if { |p| p["funzionante"] == false }
