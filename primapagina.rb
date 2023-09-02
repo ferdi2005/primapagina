@@ -28,7 +28,7 @@ pubblicati.map do |pubblicato|
   content = client.query(prop: :revisions, rvprop: :content, titles: pubblicato["title"], rvlimit: 1)["query"]["pages"]["#{pubblicato["pageid"]}"]["revisions"][0]["*"]
   
   parsed = Wikinotizie.parse(content)
-
+  
   if parsed == false
     puts "Impossibile processare #{pubblicato["title"]}"
     pubblicati.delete(pubblicato)
@@ -40,6 +40,8 @@ pubblicati.map do |pubblicato|
     pubblicato["rubydate"] = parsed[4]
   end
 end
+
+pubblicati.reject! { |pubblicato| pubblicato["rubydate"].nil? }
 
 pubblicati = pubblicati.sort_by {|p| p["rubydate"]}.reverse.first(6)
 
